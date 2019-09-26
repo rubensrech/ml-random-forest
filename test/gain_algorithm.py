@@ -26,18 +26,21 @@ def main():
     # Calculate |Dj|/|D| for each partition Dj
     attrPartitions['Prop'] = attrPartitionsCount.groupby(level=0).apply(lambda x: x.sum()/len(D))
     # Calculate entropy Info(Dj) for each parition Dj 
-    attrPartitions['EntropyTerm'] = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
+    attrPartitions['PartEntropy'] = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
     # Calculate |Dj|/|D| * Info(Dj) for each parition Dj
-    attrPartitions['Entropy'] = attrPartitions['Prop'] * attrPartitions['EntropyTerm']
+    attrPartitions['Entropy'] = attrPartitions['Prop'] * attrPartitions['PartEntropy']
     # Calculate entropy InfoA(D) of dataset after partitioning with attribute 'currAttr' 
     currAttrEntropy = attrPartitions['Entropy'].agg('sum')
     # Calculate gain Gain(A)
     currAttrGain = totalEntropy - currAttrEntropy
+    # Find attribute value that maximizes partition entropy 
+    maxEntropyAttrValue = attrPartitions.idxmax()['PartEntropy']
 
     print("> Resulting paritions for attribute: " + currAttr)
     print(attrPartitions)
     print("> Resulting entropy: " + str(currAttrEntropy))
     print("> Resulting gain: " + str(currAttrGain))
+    print("> Selected attribute value: " + maxEntropyAttrValue)
 
 
 if __name__ == "__main__":
