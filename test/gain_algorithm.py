@@ -1,5 +1,6 @@
 from graphviz import Digraph
 import pandas as pd
+from pandas.api.types import is_numeric_dtype, is_string_dtype
 from math import *
 import numpy as np 
 from tree import *
@@ -76,26 +77,52 @@ def DecisionTree(D, targetAttr, attrs):
     attrs.remove(selectedAttr)
 
     node = AttrNode(selectedAttr, selectedAttrGain)
-    attrValues = D[selectedAttr].unique()
-
-    if DEBUG: print("> New partitions: ")
 
     # Node Split: For each different value of the selected attribute
-    for v in attrValues:
-        # Get resulting partition for each value of the selected attribute
-        Dv = D[D[selectedAttr] == v]
+    if DEBUG: print("> New partitions: ")
+
+    # Selected attribute is numeric
+    if (is_numeric_dtype(D[selectedAttr])):
+        cutoff = D[selectedAttr].mean()
+
+        # A <= cutoff
+        Dv = D[D[selectedAttr] <= cutoff]
         if DEBUG: print("\n", Dv)
-        # If partition is empty 
         if (len(Dv) == 0):
             # Return leaf node labeled with most frequent class Yi in D
             majorityClass = D[targetAttr].value_counts().idxmax()
             node = ClassNode(majorityClass)
         else:
-            node.setChild(v, DecisionTree(Dv, targetAttr, attrs)) 
+            node.setChild('<= {0:.2f}'.format(cutoff), DecisionTree(Dv, targetAttr, attrs)) 
+
+        # A > cutoff
+        Dv = D[D[selectedAttr] > cutoff]
+        if DEBUG: print("\n", Dv)
+        if (len(Dv) == 0):
+            # Return leaf node labeled with most frequent class Yi in D
+            majorityClass = D[targetAttr].value_counts().idxmax()
+            node = ClassNode(majorityClass)
+        else:
+            node.setChild('> {0:.2f}'.format(cutoff), DecisionTree(Dv, targetAttr, attrs)) 
+
+    # Selected attribute is categorical
+    else:
+        attrValues = D[selectedAttr].unique()
+        for v in attrValues:
+            # Get resulting partition for each value of the selected attribute
+            Dv = D[D[selectedAttr] == v]
+            if DEBUG: print("\n", Dv)
+            # If partition is empty 
+            if (len(Dv) == 0):
+                # Return leaf node labeled with most frequent class Yi in D
+                majorityClass = D[targetAttr].value_counts().idxmax()
+                node = ClassNode(majorityClass)
+            else:
+                node.setChild(v, DecisionTree(Dv, targetAttr, attrs)) 
     return node
 
 def main():
-    D = pd.read_csv('example.csv', sep=";")
+    D = pd.read_csv('example-num.csv', sep=";")
     targetAttr = 'Joga'
 
     # Initial state

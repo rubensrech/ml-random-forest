@@ -1,0 +1,15 @@
+Tempo;Temperatura;Umidade;Ventoso;Joga
+Ensolarado;30.0;Alta;Falso;Nao
+Ensolarado;31.0;Alta;Verdadeiro;Nao
+Nublado;30.5;Alta;Falso;Sim
+Chuvoso;23.0;Alta;Falso;Sim
+Chuvoso;10.0;Normal;Falso;Sim
+Chuvoso;5.0;Normal;Verdadeiro;Nao
+Nublado;7.5;Normal;Verdadeiro;Sim
+Ensolarado;25.0;Alta;Falso;Nao
+Ensolarado;11.0;Normal;Falso;Sim
+Chuvoso;27.0;Normal;Falso;Sim
+Ensolarado;27.0;Normal;Verdadeiro;Sim
+Nublado;24.5;Alta;Verdadeiro;Sim
+Nublado;32.5;Normal;Falso;Sim
+Chuvoso;26.5;Alta;Verdadeiro;Nao
