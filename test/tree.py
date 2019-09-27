@@ -1,6 +1,6 @@
 from graphviz import Digraph
 
-dot = Digraph()
+dot = Digraph(edge_attr={'fontsize':'10.0'})
 
 class Node:
     uid = 0
@@ -12,15 +12,26 @@ class Node:
         return self.id
 
 class AttrNode(Node):
-    def __init__(self, attr):
-        Node.__init__(self)
+    def __init__(self, attr, gain=None):
+        super(AttrNode, self).__init__()
         self.attr = attr
+        self.gain = gain
         self.children = {}
-        dot.node(self.getID(), attr, shape='rectangle', color='gold')
+
+        dot.node(self.getID(), self.__getGraphValue(), color='gold', shape='rectangle', fontsize='10.0')
+
+    def __getGraphValue(self):
+        if self.gain is None:
+            return self.attr
+        else:
+            return self.attr + '\\nGain = ' + '{0:.3f}'.format(self.gain)
     
     def getAttr(self):
         return self.attr
     
+    def getGain(self):
+        return self.gain
+
     def getChild(self, value):
         return self.children[value]
     
@@ -31,17 +42,21 @@ class AttrNode(Node):
         elif isinstance(node, AttrNode):
             dot.edge(self.getID(), node.getID(), label=value)
 
+
 class ClassNode(Node):
     def __init__(self, value):
-        Node.__init__(self)
+        super(ClassNode, self).__init__()
         self.value = value
+
         dot.node(self.getID(), value, color='darkgreen')
 
+    def getValue(self):
+        return self.value
+
 def main():
-    tree = AttrNode('weather')
+    tree = AttrNode('weather', 0.127)
     tree.setChild('sun', ClassNode('yes'))
     tree.setChild('rain', AttrNode('season'))
-
     dot.view()
 
 if __name__ == "__main__":

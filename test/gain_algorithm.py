@@ -71,10 +71,11 @@ def DecisionTree(D, targetAttr, attrs):
         
     # Select attribute with max InfoGain
     selectedAttr = maxGainAttr
+    selectedAttrGain = maxGain
     # Remove attribute from attributes list
     attrs.remove(selectedAttr)
 
-    node = AttrNode(selectedAttr)
+    node = AttrNode(selectedAttr, selectedAttrGain)
     attrValues = D[selectedAttr].unique()
 
     if DEBUG: print("> New partitions: ")
@@ -103,7 +104,7 @@ def main():
 
     n = DecisionTree(D, targetAttr, attrs)
     print(n)
-    dot.view()
+    dot.view(cleanup=True)
 
 
 if __name__ == "__main__":
