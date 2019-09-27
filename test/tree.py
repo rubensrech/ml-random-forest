@@ -3,13 +3,20 @@ from graphviz import Digraph
 dot = Digraph()
 
 class Node:
-    pass
+    uid = 0
+    def __init__(self):
+        self.id = "p" + str(Node.uid)
+        Node.uid += 1
+
+    def getID(self):
+        return self.id
 
 class AttrNode(Node):
     def __init__(self, attr):
+        Node.__init__(self)
         self.attr = attr
         self.children = {}
-        dot.node(attr, attr, color='darkgreen')
+        dot.node(self.getID(), attr, shape='rectangle', color='gold')
     
     def getAttr(self):
         return self.attr
@@ -20,20 +27,21 @@ class AttrNode(Node):
     def setChild(self, value, node):
         self.children[value] = node
         if isinstance(node,ClassNode):
-            dot.edge(self.attr, ClassNode.NamePrefix + node.value, label=value)
+            dot.edge(self.getID(), node.getID(), label=value)
         elif isinstance(node, AttrNode):
-            dot.edge(self.attr, node.attr, label=value)
+            dot.edge(self.getID(), node.getID(), label=value)
 
 class ClassNode(Node):
-    NamePrefix = 'class_'
     def __init__(self, value):
+        Node.__init__(self)
         self.value = value
-        dot.node(ClassNode.NamePrefix + value, value, shape='rectangle', color='red')
+        dot.node(self.getID(), value, color='darkgreen')
 
 def main():
     tree = AttrNode('weather')
     tree.setChild('sun', ClassNode('yes'))
     tree.setChild('rain', AttrNode('season'))
+
     dot.view()
 
 if __name__ == "__main__":
