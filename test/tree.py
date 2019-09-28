@@ -44,11 +44,18 @@ class AttrNode(Node):
 
 
 class ClassNode(Node):
-    def __init__(self, value):
+    def __init__(self, value, instances=-1):
         super(ClassNode, self).__init__()
         self.value = value
+        self.instances = instances
 
-        dot.node(self.getID(), value, color='darkgreen')
+        dot.node(self.getID(), self.__getGraphValue(), color='darkgreen')
+
+    def __getGraphValue(self):
+        if self.instances > -1:
+            return self.value + ' (' + str(self.instances) + ')'
+        else:
+            return self.value
 
     def getValue(self):
         return self.value

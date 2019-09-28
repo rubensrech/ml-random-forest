@@ -49,12 +49,12 @@ def DecisionTree(D, targetAttr, attrs):
     # If all instances in D has same class
     Dclasses = D[targetAttr].unique()
     if (len(Dclasses) == 1):
-        return ClassNode(Dclasses[0])
+        return ClassNode(Dclasses[0], len(D))
 
     # If there are no more attributes
     if (len(attrs) == 0):
         majorityClass = D[targetAttr].value_counts().idxmax()
-        return ClassNode(majorityClass)
+        return ClassNode(majorityClass, len(D))
 
     # Find attribute with max InfoGain
     maxGain = -1
@@ -91,7 +91,7 @@ def DecisionTree(D, targetAttr, attrs):
         if (len(Dv) == 0):
             # Return leaf node labeled with most frequent class Yi in D
             majorityClass = D[targetAttr].value_counts().idxmax()
-            node = ClassNode(majorityClass)
+            node = ClassNode(majorityClass, len(D))
         else:
             node.setChild('<= {0:.2f}'.format(cutoff), DecisionTree(Dv, targetAttr, attrs)) 
 
@@ -101,7 +101,7 @@ def DecisionTree(D, targetAttr, attrs):
         if (len(Dv) == 0):
             # Return leaf node labeled with most frequent class Yi in D
             majorityClass = D[targetAttr].value_counts().idxmax()
-            node = ClassNode(majorityClass)
+            node = ClassNode(majorityClass, len(D))
         else:
             node.setChild('> {0:.2f}'.format(cutoff), DecisionTree(Dv, targetAttr, attrs)) 
 
@@ -116,13 +116,13 @@ def DecisionTree(D, targetAttr, attrs):
             if (len(Dv) == 0):
                 # Return leaf node labeled with most frequent class Yi in D
                 majorityClass = D[targetAttr].value_counts().idxmax()
-                node = ClassNode(majorityClass)
+                node = ClassNode(majorityClass, len(D))
             else:
                 node.setChild(v, DecisionTree(Dv, targetAttr, attrs)) 
     return node
 
 def main():
-    D = pd.read_csv('example-num.csv', sep=";")
+    D = pd.read_csv('example.csv', sep=";")
     targetAttr = 'Joga'
 
     # Initial state
