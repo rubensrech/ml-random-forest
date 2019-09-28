@@ -11,8 +11,7 @@ class DecisionTree():
         self.tree = self.__induct(D, attrs, targetAttr)
 
     def __infoGain(self, D, targetAttr, attr):
-        def info(x):
-            return x * np.log2(1/x)
+        def info(x): return x * np.log2(1/x)
 
         # Calculate dataset (D) current entropy
         currEntropy = D.groupby(targetAttr).size().apply(lambda x: info(x/len(D))).agg('sum')
@@ -22,7 +21,7 @@ class DecisionTree():
         # Create (auxiliary) table with resultant partitions Dj
         attrPartitions = D.groupby([attr]).agg({ targetAttr: 'count' })
         # Calculate |Dj|/|D| for each partition Dj
-        attrPartitions['Prop'] = attrPartitionsCount.groupby(level=0).apply(lambda d: d.sum()/len(D))
+        attrPartitions['Prop'] = attrPartitions[targetAttr].apply(lambda x: x/len(D))
         # Calculate entropy Info(Dj) for each parition Dj 
         attrPartitions['PartEntropy'] = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
         # Calculate |Dj|/|D| * Info(Dj) for each parition Dj
