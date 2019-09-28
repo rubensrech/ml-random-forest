@@ -12,11 +12,9 @@ def main():
     datasetFile = sys.argv[1]
     targetAttr = sys.argv[2]
 
-    D = pd.read_csv(datasetFile, sep=";")
-    attrs = D.keys().tolist()
-    attrs.remove(targetAttr)
+    D = pd.read_csv(datasetFile, sep=";")    
 
-    tree = DecisionTree.fromData(D, attrs, targetAttr)
+    tree = DecisionTree.fromData(D, targetAttr)
     tree.show()
 
 if __name__ == "__main__":

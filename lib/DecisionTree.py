@@ -6,7 +6,9 @@ from pandas.api.types import is_numeric_dtype, is_string_dtype
 from Tree import *
 
 class DecisionTree():
-    def __init__(self, D, attrs, targetAttr):
+    def __init__(self, D, targetAttr):
+        attrs = D.keys().tolist()
+        attrs.remove(targetAttr)
         self.graph = Digraph(edge_attr={'fontsize':'10.0'})
         self.tree = self.__induct(D, attrs, targetAttr)
 
@@ -94,8 +96,8 @@ class DecisionTree():
         return node
 
     @classmethod
-    def fromData(cls, D, attrs, targetAttr):
-        return cls(D, attrs, targetAttr)
+    def fromData(cls, D, targetAttr):
+        return cls(D, targetAttr)
 
     def show(self):
         self.graph.view(cleanup=True)
