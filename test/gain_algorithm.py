@@ -10,7 +10,7 @@ DEBUG = False
 def info(x):
     return x * np.log2(1/x)
 
-def infoGain(D, targetAttr, attr):
+def InfoGain(D, targetAttr, attr):
     # Calculate dataset (D) current entropy
     currEntropy = D.groupby(targetAttr).size().apply(lambda x: info(x/len(D))).agg('sum')
 
@@ -48,8 +48,8 @@ def DecisionTree(D, targetAttr, attrs):
     maxGain = -1
     maxGainAttr = None
     for attr in attrs:
-        attrGain = infoGain(D, targetAttr, attr)
-        if (gain > maxGain):
+        attrGain = InfoGain(D, targetAttr, attr)
+        if (attrGain > maxGain):
             maxGain = attrGain
             maxGainAttr = attr
             
