@@ -62,7 +62,7 @@ class DecisionTree():
 
         # > Node Split <
         node = None
-        def nodeSplitAux(Dv, node, edgeValue=None, leftOrRight=None):
+        def categNodeSplit(Dv, node, attrValue):
             # If partition is empty
             if (len(Dv) == 0):
                 # Return leaf node of majority class
@@ -70,14 +70,21 @@ class DecisionTree():
                 node = ClassNode(majorityClass, len(D), self.graph)
             else:
                 # Connect node to sub-tree
-                if node.isNumericalAttr():
-                    if leftOrRight == 'left':
-                        node.setLeftChild(self.__induct(Dv, attrs, targetAttr))
-                    else:
-                        node.setRightChild(self.__induct(Dv, attrs, targetAttr))
+                node.setChild(attrValue, self.__induct(Dv, attrs, targetAttr))
+            return node
+
+        def numNodeSplit(Dv, node, leftOrRight=None):
+            # If partition is empty
+            if (len(Dv) == 0):
+                # Return leaf node of majority class
+                majorityClass = D[targetAttr].value_counts().idxmax()
+                node = ClassNode(majorityClass, len(D), self.graph)
+            else:
+                # Connect node to sub-tree
+                if leftOrRight == 'left':
+                    node.setLeftChild(self.__induct(Dv, attrs, targetAttr))
                 else:
-                    node.setChild(edgeValue, self.__induct(Dv, attrs, targetAttr))
-                    
+                    node.setRightChild(self.__induct(Dv, attrs, targetAttr))
             return node
 
         # If selected attribute is numeric
@@ -88,10 +95,10 @@ class DecisionTree():
             node = NumAttrNode(maxGainAttr, maxGain, self.graph, cutoff)
             # A <= cutoff
             Dv = D[D[maxGainAttr] <= cutoff]
-            node = nodeSplitAux(Dv, node, leftOrRight='left')
+            node = numNodeSplit(Dv, node, 'left')
             # A > cutoff
             Dv = D[D[maxGainAttr] > cutoff]
-            node = nodeSplitAux(Dv, node, leftOrRight='right')
+            node = numNodeSplit(Dv, node, 'right')
         # If selected attribute is categorical
         else:
             # Create node of selected categorical attribute
@@ -101,7 +108,7 @@ class DecisionTree():
             for v in attrValues:
                 # Get resulting partition for each value of the selected attribute
                 Dv = D[D[maxGainAttr] == v]
-                node = nodeSplitAux(Dv, node, edgeValue=v)
+                node = categNodeSplit(Dv, node, v)
 
         return node
 
