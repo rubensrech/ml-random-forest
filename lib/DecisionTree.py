@@ -59,11 +59,10 @@ class DecisionTree():
 
         # Remove attribute from attributes list
         attrs.remove(maxGainAttr)
-        # Create node with selected attribute
-        node = AttrNode(maxGainAttr, maxGain, self.graph)
 
         # > Node Split <
-        def nodeSplitAux(Dv, node, edgeValue):
+        node = None
+        def nodeSplitAux(Dv, node, edgeValue=None, leftOrRight=None):
             # If partition is empty
             if (len(Dv) == 0):
                 # Return leaf node of majority class
@@ -71,33 +70,56 @@ class DecisionTree():
                 node = ClassNode(majorityClass, len(D), self.graph)
             else:
                 # Connect node to sub-tree
-                node.setChild(edgeValue, self.__induct(Dv, attrs, targetAttr))
+                if node.isNumericalAttr():
+                    if leftOrRight == 'left':
+                        node.setLeftChild(self.__induct(Dv, attrs, targetAttr))
+                    else:
+                        node.setRightChild(self.__induct(Dv, attrs, targetAttr))
+                else:
+                    node.setChild(edgeValue, self.__induct(Dv, attrs, targetAttr))
+                    
             return node
 
         # If selected attribute is numeric
         if (is_numeric_dtype(D[maxGainAttr])):
             # Define attribute division cutoff
             cutoff = D.groupby([targetAttr])[maxGainAttr].mean().agg('mean') # D[maxGainAttr].mean()
+            # Create node of selected numerical attribute
+            node = NumAttrNode(maxGainAttr, maxGain, self.graph, cutoff)
             # A <= cutoff
             Dv = D[D[maxGainAttr] <= cutoff]
-            node = nodeSplitAux(Dv, node, '<= {0:.2f}'.format(cutoff))
+            node = nodeSplitAux(Dv, node, leftOrRight='left')
             # A > cutoff
             Dv = D[D[maxGainAttr] > cutoff]
-            node = nodeSplitAux(Dv, node, '> {0:.2f}'.format(cutoff))
+            node = nodeSplitAux(Dv, node, leftOrRight='right')
         # If selected attribute is categorical
         else:
+            # Create node of selected categorical attribute
+            node = AttrNode(maxGainAttr, maxGain, self.graph)
             attrValues = D[maxGainAttr].unique()
             # For each different value of the selected attribute
             for v in attrValues:
                 # Get resulting partition for each value of the selected attribute
                 Dv = D[D[maxGainAttr] == v]
-                node = nodeSplitAux(Dv, node, v)
+                node = nodeSplitAux(Dv, node, edgeValue=v)
 
         return node
 
     @classmethod
     def fromData(cls, D, targetAttr):
         return cls(D, targetAttr)
+
+    def classify(self, instance):
+        prediction = None
+        currNode = self.tree
+        while prediction is None:
+            if TreeNode.isClassNode(currNode):
+                prediction = currNode.value
+            else:
+                instVal = instance[currNode.attr]
+                currNode = currNode.getChild(instVal)
+
+        return prediction
 
     def show(self):
         self.graph.view(cleanup=True)

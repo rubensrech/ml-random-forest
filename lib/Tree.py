@@ -11,6 +11,14 @@ class TreeNode:
     def getID(self):
         return self.id
 
+    @staticmethod
+    def isClassNode(node):
+        return isinstance(node, ClassNode)
+
+    @staticmethod
+    def isAttrNode(node):
+        return isinstance(node, AttrNode)
+
 class AttrNode(TreeNode):
     def __init__(self, attr, gain=None, graph=None):
         super().__init__(graph)
@@ -32,10 +40,37 @@ class AttrNode(TreeNode):
     def setChild(self, value, node):
         self.children[value] = node
         if self.graph is not None:
-            if isinstance(node, ClassNode):
-                self.graph.edge(self.getID(), node.getID(), label=value)
-            elif isinstance(node, AttrNode):
-                self.graph.edge(self.getID(), node.getID(), label=value)
+            self.graph.edge(self.getID(), node.getID(), label=value)
+    
+    def isNumericalAttr(self):
+        return isinstance(self, NumAttrNode)
+
+class NumAttrNode(AttrNode):
+    def __init__(self, attr, gain=None, graph=None, cutoff=None):
+        self.cutoff = cutoff
+        super().__init__(attr, gain, graph)
+
+    def setCutOff(self, cutoff):
+        self.cutoff = cutoff
+
+    def setLeftChild(self, node):
+        if self.cutoff is None: return 
+        self.children['left'] = node
+        if self.graph is not None:
+            self.graph.edge(self.getID(), node.getID(), label='<= {0:.2f}'.format(self.cutoff))
+
+    def setRightChild(self, node):
+        if self.cutoff is None: return 
+        self.children['right'] = node
+        if self.graph is not None:
+            self.graph.edge(self.getID(), node.getID(), label='> {0:.2f}'.format(self.cutoff))
+
+    def getChild(self, value):
+        if self.cutoff is None: return 
+        if value <= self.cutoff:
+            return self.children['left']
+        else:
+            return self.children['right']
 
 class ClassNode(TreeNode):
     def __init__(self, value, instances=-1, graph=None):
