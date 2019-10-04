@@ -73,7 +73,7 @@ class DecisionTree():
                 node.setChild(attrValue, self.__induct(Dv, attrs, targetAttr))
             return node
 
-        def numNodeSplit(Dv, node, leftOrRight=None):
+        def numNodeSplit(Dv, node, leftOrRight):
             # If partition is empty
             if (len(Dv) == 0):
                 # Return leaf node of majority class
