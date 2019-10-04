@@ -1,6 +1,9 @@
 import pandas as pd
+
+import os
 import sys
-sys.path.append('../lib')
+LIB_PATH = os.path.join(os.path.dirname(__file__), '../lib')
+sys.path.append(LIB_PATH)
 
 from DecisionTree import *
 
