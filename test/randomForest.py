@@ -18,7 +18,7 @@ def main():
     ntree = int(sys.argv[3])
 
     # Read dataset
-    D = pd.read_csv(datasetFile, sep=";")
+    D = pd.read_csv(datasetFile)
     # Build Random Forest
     forest = RandomForest(D, targetAttr, ntree)
 
