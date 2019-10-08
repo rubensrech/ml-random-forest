@@ -22,7 +22,7 @@ class DecisionTree:
         self.tree = self.__induct(D, attrs, targetAttr)
 
     def __createGraph(self):
-        self.filename = "Tree%d" % (GRAPH_PATH, DecisionTree.uid)
+        self.filename = "Tree%d" % DecisionTree.uid
         self.graph = Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
         DecisionTree.uid += 1
 
@@ -79,16 +79,6 @@ class DecisionTree:
 
         # > Node Split <
         node = None
-        def categNodeSplit(Dv, node, attrValue):
-            # If partition is empty
-            if (len(Dv) == 0):
-                # Return leaf node of majority class
-                majorityClass = D[targetAttr].value_counts().idxmax()
-                node = ClassNode(majorityClass, len(D), self.graph)
-            else:
-                # Connect node to sub-tree
-                node.setChild(attrValue, self.__induct(Dv, attrs, targetAttr))
-            return node
 
         def numNodeSplit(Dv, node, leftOrRight):
             # If partition is empty
@@ -112,9 +102,22 @@ class DecisionTree:
             node = NumAttrNode(maxGainAttr, maxGain, self.graph, cutoff)
             # A <= cutoff
             Dv = D[D[maxGainAttr] <= cutoff]
-            node = numNodeSplit(Dv, node, 'left')
+            # If partition is empty
+            if (len(Dv) == 0):
+                # Return leaf node of majority class
+                majorityClass = D[targetAttr].value_counts().idxmax()
+                return ClassNode(majorityClass, len(D), self.graph)
+            else:
+                node.setLeftChild(self.__induct(Dv, attrs, targetAttr))
             # A > cutoff
             Dv = D[D[maxGainAttr] > cutoff]
+            # If partition is empty
+            if (len(Dv) == 0):
+                # Return leaf node of majority class
+                majorityClass = D[targetAttr].value_counts().idxmax()
+                return ClassNode(majorityClass, len(D), self.graph)
+            else:
+                node.setRightChild(self.__induct(Dv, attrs, targetAttr))
             node = numNodeSplit(Dv, node, 'right')
         # If selected attribute is categorical
         else:
@@ -125,7 +128,14 @@ class DecisionTree:
             for v in attrValues:
                 # Get resulting partition for each value of the selected attribute
                 Dv = D[D[maxGainAttr] == v]
-                node = categNodeSplit(Dv, node, v)
+                # If partition is empty
+                if (len(Dv) == 0):
+                    # Return leaf node of majority class
+                    majorityClass = D[targetAttr].value_counts().idxmax()
+                    return ClassNode(majorityClass, len(D), self.graph)
+                else:
+                    # Connect node to sub-tree
+                    node.setChild(v, self.__induct(Dv, attrs, targetAttr))
 
         return node
 
