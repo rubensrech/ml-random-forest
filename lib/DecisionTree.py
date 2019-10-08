@@ -14,8 +14,8 @@ random.seed(1)
 class DecisionTree:
     uid = 0
 
-    def __init__(self, D, targetAttr):
-        self.__createGraph()
+    def __init__(self, D, targetAttr, graph=True):
+        self.graph = self.__createGraph() if graph else None
 
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
@@ -23,9 +23,9 @@ class DecisionTree:
 
     def __createGraph(self):
         self.filename = "Tree%d" % DecisionTree.uid
-        self.graph = Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
         DecisionTree.uid += 1
-
+        return Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
+        
     def __infoGain(self, D, targetAttr, attr):
         def info(x): return x * np.log2(1/x)
 
@@ -124,10 +124,6 @@ class DecisionTree:
 
         return node
 
-    @classmethod
-    def fromData(cls, D, targetAttr):
-        return cls(D, targetAttr)
-
     def classify(self, instance):
         prediction = None
         currNode = self.tree
@@ -145,4 +141,7 @@ class DecisionTree:
         return prediction
 
     def render(self):
-        self.graph.view(cleanup=True)
+        if self.graph is not None:
+            self.graph.view(cleanup=True)
+        else:
+            raise Exception('Nothing to render')

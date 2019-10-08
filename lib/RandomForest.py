@@ -1,13 +1,14 @@
 from DecisionTree import *
 
 class RandomForest:
-    def __init__(self, D, targetAttr, ntree):
+    def __init__(self, D, targetAttr, ntree, graph=True):
         self.trees = []
         for i in range(ntree):
+            print("> Training trees... (%d/%d)" % (i+1, ntree), end='\r')
             # Get bootstrap sets
             (trainSet, testSet) = self.bootstrap(D)
             # Create Decision Tree from training set
-            tree = DecisionTree.fromData(trainSet, targetAttr)
+            tree = DecisionTree(trainSet, targetAttr, graph=graph)
             # Add tree to the ensemble
             self.trees.append(tree)
 
@@ -26,4 +27,5 @@ class RandomForest:
 
     def render(self):
         for tree in self.trees:
-            tree.render()
+            if tree.graph is not None:
+                tree.render()

@@ -19,7 +19,7 @@ def main():
     D = pd.read_csv(datasetFile)
 
     # Tree induction
-    tree = DecisionTree.fromData(D, targetAttr)
+    tree = DecisionTree(D, targetAttr)
     tree.render()
 
     # Test classification

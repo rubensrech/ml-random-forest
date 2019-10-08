@@ -20,7 +20,7 @@ def main():
     # Read dataset
     D = pd.read_csv(datasetFile)
     # Build Random Forest
-    forest = RandomForest(D, targetAttr, ntree)
+    forest = RandomForest(D, targetAttr, ntree, graph=False)
 
     if ntree <= 6:
         forest.render()
