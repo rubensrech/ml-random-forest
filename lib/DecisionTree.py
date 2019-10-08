@@ -2,10 +2,16 @@ import pandas as pd
 import numpy as np
 from graphviz import Digraph
 from pandas.api.types import is_numeric_dtype, is_string_dtype
+from math import ceil, sqrt
+import random
 
 from Tree import *
 
-class DecisionTree():
+# from datetime import datetime
+# random.seed(datetime.now())
+random.seed(1)
+
+class DecisionTree:
     def __init__(self, D, targetAttr):
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
@@ -51,7 +57,10 @@ class DecisionTree():
         # Find attribute with max info gain
         maxGain = -1
         maxGainAttr = None
-        for attr in attrs:
+        # Attributes sampling
+        m = ceil(sqrt(len(attrs)))
+        attrsSample = random.sample(attrs, m)
+        for attr in attrsSample:
             attrGain = self.__infoGain(D, targetAttr, attr)
             if (attrGain > maxGain):
                 maxGain = attrGain
