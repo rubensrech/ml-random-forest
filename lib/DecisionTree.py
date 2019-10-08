@@ -12,10 +12,15 @@ from Tree import *
 random.seed(1)
 
 class DecisionTree:
+    uid = 0
+
     def __init__(self, D, targetAttr):
+        self.name = "Tree%d" % DecisionTree.uid
+        self.graph = Digraph(filename=self.name, edge_attr={'fontsize':'10.0'}, format="pdf")
+        DecisionTree.uid += 1
+
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
-        self.graph = Digraph(edge_attr={'fontsize':'10.0'})
         self.tree = self.__induct(D, attrs, targetAttr)
 
     def __infoGain(self, D, targetAttr, attr):
@@ -139,3 +144,4 @@ class DecisionTree:
 
     def show(self):
         self.graph.view(cleanup=True)
+        
