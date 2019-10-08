@@ -35,6 +35,7 @@ class AttrNode(TreeNode):
             return self.attr + '\\nGain = ' + '{0:.3f}'.format(self.gain)
 
     def getChild(self, value):
+        # Might not have child 'value'
         return self.children[value]
     
     def setChild(self, value, node):
@@ -44,6 +45,12 @@ class AttrNode(TreeNode):
     
     def isNumericalAttr(self):
         return isinstance(self, NumAttrNode)
+
+    def countInstances(self):
+        count = 0
+        for v in self.children.keys():
+            count += self.getChild(v).countInstances()
+        return count
 
 class NumAttrNode(AttrNode):
     def __init__(self, attr, gain=None, graph=None, cutoff=None):
@@ -66,11 +73,15 @@ class NumAttrNode(AttrNode):
             self.graph.edge(self.getID(), node.getID(), label='> {0:.2f}'.format(self.cutoff))
 
     def getChild(self, value):
-        if self.cutoff is None: return 
+        if self.cutoff is None: return
         if value <= self.cutoff:
             return self.children['left']
         else:
             return self.children['right']
+
+    def countInstances(self):
+        return self.children['left'].countInstances() + self.children['right'].countInstances()
+
 
 class ClassNode(TreeNode):
     def __init__(self, value, instances=-1, graph=None):
@@ -82,6 +93,9 @@ class ClassNode(TreeNode):
 
     def __getGraphValue(self):
         if self.instances > -1:
-            return self.value + ' (' + str(self.instances) + ')'
+            return "%s (%d)" % (self.value, self.instances)
         else:
             return self.value
+
+    def countInstances(self):
+        return self.instances

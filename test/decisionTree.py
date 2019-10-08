@@ -16,7 +16,7 @@ def main():
     targetAttr = sys.argv[2]
 
     # Read dataset
-    D = pd.read_csv(datasetFile, sep=";")    
+    D = pd.read_csv(datasetFile)
 
     # Tree induction
     tree = DecisionTree.fromData(D, targetAttr)
