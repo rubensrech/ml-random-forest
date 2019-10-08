@@ -79,7 +79,6 @@ class DecisionTree:
 
         # > Node Split <
         node = None
-
         # If selected attribute is numeric
         if (is_numeric_dtype(D[maxGainAttr])):
             # Define attribute division cutoff

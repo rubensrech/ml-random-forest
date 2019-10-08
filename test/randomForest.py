@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import time
 
 import os
 import sys
@@ -9,7 +10,7 @@ sys.path.append(LIB_PATH)
 from RandomForest import *
 
 def main():
-    if (len(sys.argv) < 3):
+    if (len(sys.argv) < 4):
         print("Usage: python3 %s <dataset-csv> <target-attr> <ntree>" % sys.argv[0])
         exit(-1)
 
@@ -19,8 +20,14 @@ def main():
 
     # Read dataset
     D = pd.read_csv(datasetFile)
+
+    startTime = time.time()
+
     # Build Random Forest
     forest = RandomForest(D, targetAttr, ntree, graph=False)
+
+    trainingTime = time.time() - startTime
+    print("> Training duration: %f s" % trainingTime)
 
     if ntree <= 6:
         forest.render()
