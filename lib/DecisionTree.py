@@ -80,20 +80,6 @@ class DecisionTree:
         # > Node Split <
         node = None
 
-        def numNodeSplit(Dv, node, leftOrRight):
-            # If partition is empty
-            if (len(Dv) == 0):
-                # Return leaf node of majority class
-                majorityClass = D[targetAttr].value_counts().idxmax()
-                node = ClassNode(majorityClass, len(D), self.graph)
-            else:
-                # Connect node to sub-tree
-                if leftOrRight == 'left':
-                    node.setLeftChild(self.__induct(Dv, attrs, targetAttr))
-                else:
-                    node.setRightChild(self.__induct(Dv, attrs, targetAttr))
-            return node
-
         # If selected attribute is numeric
         if (is_numeric_dtype(D[maxGainAttr])):
             # Define attribute division cutoff
@@ -118,7 +104,6 @@ class DecisionTree:
                 return ClassNode(majorityClass, len(D), self.graph)
             else:
                 node.setRightChild(self.__induct(Dv, attrs, targetAttr))
-            node = numNodeSplit(Dv, node, 'right')
         # If selected attribute is categorical
         else:
             # Create node of selected categorical attribute
@@ -151,7 +136,11 @@ class DecisionTree:
                 prediction = currNode.value
             else:
                 instVal = instance[currNode.attr]
-                currNode = currNode.getChild(instVal)
+                nextNode = currNode.getChild(instVal)
+                if nextNode is None:
+                    currNode = nextNode
+                else:
+                    currNode = nextNode
 
         return prediction
 
