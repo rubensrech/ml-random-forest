@@ -17,9 +17,19 @@ def main():
     targetAttr = sys.argv[2]
     ntree = int(sys.argv[3])
 
+    # Read dataset
     D = pd.read_csv(datasetFile, sep=";")
-
+    # Build Random Forest
     forest = RandomForest(D, targetAttr, ntree)
+    # Test classification
+    instance = D.iloc[4]
+    print("> Test instance:")
+    print(instance)
+    print("> Prediction: %s" % forest.classify(instance))
+
+    if ntree <= 6:
+        forest.render()
+
 
 if __name__ == "__main__":
     main()
