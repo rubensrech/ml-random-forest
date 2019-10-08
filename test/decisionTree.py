@@ -20,7 +20,7 @@ def main():
 
     # Tree induction
     tree = DecisionTree.fromData(D, targetAttr)
-    tree.show()
+    tree.render()
 
     # Test classification
     instance = D.iloc[4]

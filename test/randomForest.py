@@ -30,6 +30,5 @@ def main():
     if ntree <= 6:
         forest.render()
 
-
 if __name__ == "__main__":
     main()

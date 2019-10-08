@@ -15,13 +15,16 @@ class DecisionTree:
     uid = 0
 
     def __init__(self, D, targetAttr):
-        self.name = "Tree%d" % DecisionTree.uid
-        self.graph = Digraph(filename=self.name, edge_attr={'fontsize':'10.0'}, format="pdf")
-        DecisionTree.uid += 1
+        self.__createGraph()
 
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
         self.tree = self.__induct(D, attrs, targetAttr)
+
+    def __createGraph(self):
+        self.filename = "Tree%d" % (GRAPH_PATH, DecisionTree.uid)
+        self.graph = Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
+        DecisionTree.uid += 1
 
     def __infoGain(self, D, targetAttr, attr):
         def info(x): return x * np.log2(1/x)
@@ -142,6 +145,5 @@ class DecisionTree:
 
         return prediction
 
-    def show(self):
+    def render(self):
         self.graph.view(cleanup=True)
-        

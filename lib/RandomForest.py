@@ -26,4 +26,4 @@ class RandomForest:
 
     def render(self):
         for tree in self.trees:
-            tree.show()
+            tree.render()
