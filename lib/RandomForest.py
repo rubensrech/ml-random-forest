@@ -1,7 +1,10 @@
+import time
 from DecisionTree import *
 
 class RandomForest:
     def __init__(self, D, targetAttr, ntree, graph=True):
+        startTime = time.time()
+
         self.trees = []
         for i in range(ntree):
             print("> Training trees... (%d/%d)" % (i+1, ntree), end='\r')
@@ -11,6 +14,9 @@ class RandomForest:
             tree = DecisionTree(trainSet, targetAttr, graph=graph)
             # Add tree to the ensemble
             self.trees.append(tree)
+            
+        trainingTime = time.time() - startTime
+        print("> Training duration: %f s" % trainingTime)
 
     def bootstrap(self, D, frac=0.8):
         train = D.sample(frac=frac, replace=True)

@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import time
 
 import os
 import sys
@@ -21,13 +20,8 @@ def main():
     # Read dataset
     D = pd.read_csv(datasetFile)
 
-    startTime = time.time()
-
     # Build Random Forest
     forest = RandomForest(D, targetAttr, ntree, graph=False)
-
-    trainingTime = time.time() - startTime
-    print("> Training duration: %f s" % trainingTime)
 
     if ntree <= 6:
         forest.render()
