@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from graphviz import Digraph
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-from math import ceil, sqrt
+from math import ceil
 import random
 
 from Tree import *
@@ -14,11 +14,13 @@ random.seed(1)
 class DecisionTree:
     uid = 0
 
-    def __init__(self, D, targetAttr, attrsNVals, graph=True):
+    def __init__(self, D, targetAttr, attrsNVals, attrsSampleFn=None, graph=True):
         self.graph = self.__createGraph() if graph else None
 
         self.targetAttr = targetAttr
         self.attrsNVals = attrsNVals
+        self.attrsSampleFn = attrsSampleFn
+
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
         self.tree = self.__induct(D, attrs)
@@ -69,9 +71,13 @@ class DecisionTree:
         # Find attribute with max info gain
         maxGain = -1
         maxGainAttr = None
-        # Attributes sampling
-        m = ceil(sqrt(len(attrs)))
-        attrsSample = random.sample(attrs, m)
+        if self.attrsSampleFn is not None:
+            # Attributes sampling
+            m = ceil(self.attrsSampleFn(len(attrs)))
+            print(m)
+            attrsSample = random.sample(attrs, m)
+        else:
+            attrsSample = attrs
         for attr in attrsSample:
             attrGain = self.__infoGain(D, attr)
             if (attrGain > maxGain):

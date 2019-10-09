@@ -4,7 +4,7 @@ from DecisionTree import *
 from ValidationTools import *
 
 class RandomForest:
-    def __init__(self, D, targetAttr, attrsNVals, ntree, graph=True):
+    def __init__(self, D, targetAttr, attrsNVals, ntree, attrsSampleFn=None, graph=True):
         startTime = time.time()
         self.targetAttr = targetAttr
         self.trees = []
@@ -14,7 +14,7 @@ class RandomForest:
             # Get bootstraps
             (trainSet, testSet) = ValidationTools.bootstrap(D)
             # Create Decision Tree from training set
-            tree = DecisionTree(trainSet, targetAttr, attrsNVals, graph=graph)
+            tree = DecisionTree(trainSet, targetAttr, attrsNVals, attrsSampleFn=attrsSampleFn, graph=graph)
             # Add tree to the ensemble
             self.trees.append(tree)
         trainingTime = time.time() - startTime

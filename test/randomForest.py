@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from math import sqrt
 
 import os
 import sys
@@ -22,7 +23,7 @@ def crossValidation(D, targetAttr, ntree, K):
         trainFolds = pd.concat([f for j,f in enumerate(kfolds) if j != i])
         # Create Random Forest with training folds
         print("> TRAINING Random Forest (%d/%d)" % (i+1, K))
-        forest = RandomForest(trainFolds, targetAttr, attrsNVals, ntree, graph=False)
+        forest = RandomForest(trainFolds, targetAttr, attrsNVals, ntree, attrsSampleFn=sqrt, graph=False)
         # # Evaluate Random Forest with test fold
         print("> EVALUATING Random Forest (%d/%d)" % (i+1, K))
         performance = forest.evaluate(testFold)
