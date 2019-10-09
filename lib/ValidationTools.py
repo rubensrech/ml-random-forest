@@ -8,7 +8,7 @@ class ValidationTools:
         return (train, test)
 
     @staticmethod
-    def getFolds(D, targetAttr, K):
+    def getKFolds(D, targetAttr, K):
         kfolds = {}
 
         # Calculate number of instances of each class to be in each fold
