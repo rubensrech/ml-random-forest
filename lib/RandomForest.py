@@ -31,7 +31,7 @@ class RandomForest:
     def evaluate(self, Dt):
         targetAttr = self.targetAttr
         # Classify all instances in test set
-        Dt['Preds'] = Dt.apply(lambda x: self.classify(x), axis=1)
+        preds = Dt.apply(lambda x: self.classify(x), axis=1)
 
         # cm = pd.crosstab(Dt[targetAttr], Dt['Preds'], rownames=['Actual'], colnames=['Predicted'], dropna=False)
         # print(cm)
@@ -40,9 +40,9 @@ class RandomForest:
         classes = Dt[targetAttr].unique()
         classesData = { 'TP':[], 'FP':[], 'FN':[] }
         for c in classes:
-            tp = len(Dt[(Dt[targetAttr] == c) & (Dt['Preds'] == c)])
-            fp = len(Dt[(Dt['Preds'] == c) & (Dt[targetAttr] != c)])
-            fn = len(Dt[(Dt[targetAttr] == c) & (Dt['Preds'] != c)])
+            tp = len(Dt[(Dt[targetAttr] == c) & (preds == c)])
+            fp = len(Dt[(preds == c) & (Dt[targetAttr] != c)])
+            fn = len(Dt[(Dt[targetAttr] == c) & (preds != c)])
             classesData['TP'].append(tp)
             classesData['FP'].append(fp)
             classesData['FN'].append(fn)

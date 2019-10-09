@@ -9,11 +9,13 @@ sys.path.append(LIB_PATH)
 from RandomForest import *
 from ValidationTools import *
 
+from statistics import mean, stdev
 def crossValidation(D, targetAttr, ntree, K):
     print(">> Cross Validation <<")
     attrsNVals = D.nunique()
     kfolds = ValidationTools.getKFolds(D, targetAttr, K)
-    for i in range(1): # for i in range(K):
+    performances = []
+    for i in range(3): #for i in range(K):
         # Select test fold
         testFold = kfolds[i]
         # Select training folds (merge K-1 folds)
@@ -21,10 +23,17 @@ def crossValidation(D, targetAttr, ntree, K):
         # Create Random Forest with training folds
         print("> Training Random Forest (%d/%d)" % (i+1, K))
         forest = RandomForest(trainFolds, targetAttr, attrsNVals, ntree, graph=False)
-        # Evaluate Random Forest with test fold
+        # # Evaluate Random Forest with test fold
         print("> Evaluating Random Forest (%d/%d)" % (i+1, K))
-        forest.evaluate(testFold)
-        
+        performance = forest.evaluate(testFold)
+        performances.append(performance)
+        print("Test fold = %d => Performance %f" % (i, performance))
+    
+    # Calculate average performance
+    avgPerf = mean(performances)
+    stdevPerf = stdev(performances)
+    print((avgPerf, stdevPerf))
+    return (avgPerf, stdevPerf)
 
 def main():
     if (len(sys.argv) < 4):
