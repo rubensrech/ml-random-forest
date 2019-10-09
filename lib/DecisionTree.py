@@ -7,10 +7,6 @@ import random
 
 from Tree import *
 
-# from datetime import datetime
-# random.seed(datetime.now())
-random.seed(1)
-
 class DecisionTree:
     uid = 0
 

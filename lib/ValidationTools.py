@@ -1,14 +1,23 @@
 import pandas as pd
 from math import floor
 from statistics import mean, stdev
-from math import sqrt
+from math import sqrt, ceil
+import random
+import time
+
+random.seed(1)
 
 from RandomForest import *
 
+def sample(D, n):
+    indexes = random.sample(list(D.index.values), n)
+    return D.loc[indexes]
+
 def bootstrap(D, frac=1):
-    train = D.sample(frac=frac, replace=True, random_state=1)
-    test = D.drop(train.index)
-    return (train, test)
+    trainIndexes = random.choices(D.index, k=ceil(len(D)*frac))
+    trainSet = D.loc[trainIndexes]
+    testSet = D.drop(trainIndexes)
+    return (trainSet, testSet)
 
 def getKFolds(D, targetAttr, K):
     kfolds = {}
@@ -26,7 +35,7 @@ def getKFolds(D, targetAttr, K):
         # For each fold
         for i in range(K):
             # Sample instances of class 'c'
-            classSample = classSet.sample(n=classInstsCount, random_state=1)
+            classSample = sample(classSet, classInstsCount)
             # Add sample to fold
             if i not in kfolds:
                 kfolds[i] = classSample
@@ -39,6 +48,7 @@ def getKFolds(D, targetAttr, K):
 
 def crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt):
     print("============ CROSS VALIDATION ============")
+    startTime = time.time()
     # Get the number of possible values for each attribute in dataset
     attrsNVals = D.nunique()
     kfolds = getKFolds(D, targetAttr, K)
@@ -59,11 +69,13 @@ def crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt):
     # Calculate average performance
     avgPerf = mean(performances)
     stdevPerf = stdev(performances)
+    totalTime = time.time() - startTime
     # Print results
     print("------------ x ------------")
     print("RESULTS")
     print("- K = %d" % K)
     print("- NTREE = %d" % ntree)
+    print("- Total duration: %f s" % totalTime)
     print("- Average Performance: %f" % avgPerf)
     print("- Performance Std Deviation: %f" % stdevPerf)
     print("==========================================")

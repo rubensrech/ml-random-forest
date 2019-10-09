@@ -1,5 +1,7 @@
 import pandas as pd
+import numpy as np
 from math import sqrt
+import random
 
 import os
 import sys
@@ -18,6 +20,9 @@ def main():
     targetAttr = sys.argv[3]
     K = int(sys.argv[4])
     ntree = int(sys.argv[5])
+
+    random.seed(1)
+    np.random.seed(1)
 
     # Read dataset
     D = pd.read_csv(datasetFile, sep=separator)
