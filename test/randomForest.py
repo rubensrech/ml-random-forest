@@ -9,36 +9,24 @@ sys.path.append(LIB_PATH)
 from RandomForest import *
 
 def getFolds(D, targetAttr, K):
-    DClasses = D.groupby([targetAttr]).agg({ targetAttr: 'count' })
-    DClasses['InstsPerFold'] = DClasses.apply(lambda x: x/K)
+    classesInstsCount = D.groupby([targetAttr]).agg({ targetAttr: 'count' })
+    classesInstsCount['InstsPerFold'] = classesInstsCount.apply(lambda x: x/K)
 
-    classSets = {}
     classes = D[targetAttr].unique()
-    for c in classes:
-        classSets[c] = D[D[targetAttr] == c]
 
     folds = {}
-    for i in range(K):
-        for j, c in enumerate(classes):
-            classInstsCount = int(DClasses.loc[c]['InstsPerFold'])
-            classSample = classSets[c].sample(n=classInstsCount)
+    for c in classes:
+        classSet = D[D[targetAttr] == c]
+        classInstsCount = int(classesInstsCount.loc[c]['InstsPerFold'])
+        for i in range(K):
+            classSample = classSet.sample(n=classInstsCount)
             if i not in folds:
                 folds[i] = classSample
             else:
                 folds[i] = folds[i].append(classSample, sort=False)
-            classSets[c] = classSets[c].drop(classSample.index)
-
-    folds = list(folds.values())
-    print("%d folds" % len(folds))
-    print(folds)
-    for i in range(K):
-        print(">>> Fold %d <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" % i)
-        print(folds[i][targetAttr])
-        print(folds[i].groupby([targetAttr]).agg({ targetAttr: 'count' }).apply(lambda x: x/K))
+            classSet = classSet.drop(classSample.index)
     
-    # print(classSets)
-    # print(DClasses)
-    # print(len(D)/K)
+    return list(folds.values())
 
 def main():
     if (len(sys.argv) < 4):
@@ -53,7 +41,15 @@ def main():
     # Read dataset
     D = pd.read_csv(datasetFile, sep=separator)
 
-    getFolds(D, targetAttr, 10)
+    K = 10
+    folds = getFolds(D, targetAttr, K)
+    
+    print("%d folds" % len(folds))
+    print(folds)
+    for i in range(K):
+        print(">>> Fold %d <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" % i)
+        print(folds[i][targetAttr])
+        print(folds[i].groupby([targetAttr]).agg({ targetAttr: 'count' }).apply(lambda x: x/K))
     return
 
     # Build Random Forest
