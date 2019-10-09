@@ -1,10 +1,6 @@
 import time
 from DecisionTree import *
-
-def bootstrap(D, frac=0.8):
-    train = D.sample(frac=frac, replace=True)
-    test = D.drop(train.index)
-    return (train, test)
+from ValidationTools import *
 
 class RandomForest:
     def __init__(self, D, targetAttr, ntree, graph=True):
@@ -13,8 +9,8 @@ class RandomForest:
         # Training 'ntree' trees with different bootstraps
         for i in range(ntree):
             print("> Training trees... (%d/%d)" % (i+1, ntree), end='\r')
-            # Get bootstrap sets
-            (trainSet, testSet) = bootstrap(D)
+            # Get bootstraps
+            (trainSet, testSet) = ValidationTools.bootstrap(D)
             # Create Decision Tree from training set
             tree = DecisionTree(trainSet, targetAttr, graph=graph)
             # Add tree to the ensemble

@@ -7,26 +7,7 @@ LIB_PATH = os.path.join(os.path.dirname(__file__), '../lib')
 sys.path.append(LIB_PATH)
 
 from RandomForest import *
-
-def getFolds(D, targetAttr, K):
-    classesInstsCount = D.groupby([targetAttr]).agg({ targetAttr: 'count' })
-    classesInstsCount['InstsPerFold'] = classesInstsCount.apply(lambda x: x/K)
-
-    classes = D[targetAttr].unique()
-
-    folds = {}
-    for c in classes:
-        classSet = D[D[targetAttr] == c]
-        classInstsCount = int(classesInstsCount.loc[c]['InstsPerFold'])
-        for i in range(K):
-            classSample = classSet.sample(n=classInstsCount)
-            if i not in folds:
-                folds[i] = classSample
-            else:
-                folds[i] = folds[i].append(classSample, sort=False)
-            classSet = classSet.drop(classSample.index)
-    
-    return list(folds.values())
+from ValidationTools import *
 
 def main():
     if (len(sys.argv) < 4):
@@ -41,19 +22,8 @@ def main():
     # Read dataset
     D = pd.read_csv(datasetFile, sep=separator)
 
-    K = 10
-    folds = getFolds(D, targetAttr, K)
-    
-    print("%d folds" % len(folds))
-    print(folds)
-    for i in range(K):
-        print(">>> Fold %d <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" % i)
-        print(folds[i][targetAttr])
-        print(folds[i].groupby([targetAttr]).agg({ targetAttr: 'count' }).apply(lambda x: x/K))
-    return
-
     # Build Random Forest
-    forest = RandomForest(D, targetAttr, ntree, graph=False)
+    forest = RandomForest(D, targetAttr, ntree, graph=True)
 
     if ntree <= 6:
         forest.render()
