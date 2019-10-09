@@ -11,23 +11,23 @@ from ValidationTools import *
 
 from statistics import mean, stdev
 def crossValidation(D, targetAttr, ntree, K):
-    print(">> Cross Validation <<")
+    print(">> CROSS VALIDATION <<")
     attrsNVals = D.nunique()
     kfolds = ValidationTools.getKFolds(D, targetAttr, K)
     performances = []
-    for i in range(3): #for i in range(K):
+    for i in range(K):
         # Select test fold
         testFold = kfolds[i]
         # Select training folds (merge K-1 folds)
         trainFolds = pd.concat([f for j,f in enumerate(kfolds) if j != i])
         # Create Random Forest with training folds
-        print("> Training Random Forest (%d/%d)" % (i+1, K))
+        print("> TRAINING Random Forest (%d/%d)" % (i+1, K))
         forest = RandomForest(trainFolds, targetAttr, attrsNVals, ntree, graph=False)
         # # Evaluate Random Forest with test fold
-        print("> Evaluating Random Forest (%d/%d)" % (i+1, K))
+        print("> EVALUATING Random Forest (%d/%d)" % (i+1, K))
         performance = forest.evaluate(testFold)
         performances.append(performance)
-        print("Test fold = %d => Performance %f" % (i, performance))
+        print(">> Test fold %d => Performance %f" % (i, performance))
     
     # Calculate average performance
     avgPerf = mean(performances)
