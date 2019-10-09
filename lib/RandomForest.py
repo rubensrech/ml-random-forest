@@ -2,7 +2,6 @@ import time
 import numpy as np
 from DecisionTree import *
 import ValidationTools
-
 class RandomForest:
     def __init__(self, D, targetAttr, attrsNVals, ntree, attrsSampleFn=None, graph=True):
         startTime = time.time()
@@ -57,12 +56,12 @@ class RandomForest:
         classesMetrics['Recall'] = classesMetrics.apply(Rec, axis=1)
         prec = classesMetrics['Precision'].mean()
         rec = classesMetrics['Recall'].mean()
-
         # Calculate F1-measure
         F1 = 2 * (prec * rec)/(prec + rec) if (prec + rec) > 0 else 0
+
         # print(classesMetrics)
         # print(F1)
-        return F1
+        return (prec, rec, F1)
 
     def render(self):
         for tree in self.trees:

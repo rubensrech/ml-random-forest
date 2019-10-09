@@ -52,7 +52,9 @@ def crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt):
     # Get the number of possible values for each attribute in dataset
     attrsNVals = D.nunique()
     kfolds = getKFolds(D, targetAttr, K)
-    performances = []
+    F1s = []
+    precisionAcc = 0
+    recallAcc = 0
     for i in range(K):
         # Select test fold
         testFold = kfolds[i]
@@ -63,12 +65,15 @@ def crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt):
         forest = RandomForest(trainFolds, targetAttr, attrsNVals, ntree, attrsSampleFn=attrsSampleFn, graph=False)
         # # Evaluate Random Forest with test fold
         print("> EVALUATING Random Forest (%d/%d)" % (i+1, K))
-        performance = forest.evaluate(testFold)
-        performances.append(performance)
-        print(">> Test fold %d => Performance %f" % (i, performance))
+        (precision, recall, F1) = forest.evaluate(testFold)
+        F1s.append(F1)
+        precisionAcc += precision
+        recallAcc += recall
     # Calculate average performance
-    avgPerf = mean(performances)
-    stdevPerf = stdev(performances)
+    avgPerf = mean(F1s)
+    stdevPerf = stdev(F1s)
+    avgPrecision = precisionAcc / K
+    avgRecall = recallAcc / K
     totalTime = time.time() - startTime
     # Print results
     print("------------ x ------------")
@@ -78,5 +83,7 @@ def crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt):
     print("- Total duration: %f s" % totalTime)
     print("- Average Performance: %f" % avgPerf)
     print("- Performance Std Deviation: %f" % stdevPerf)
+    print("- Average Precision: %f" % avgPrecision)
+    print("- Average Recall: %f" % avgRecall)
     print("==========================================")
-    return (avgPerf, stdevPerf)
+    return (avgPerf, stdevPerf, avgPrecision, avgRecall)
