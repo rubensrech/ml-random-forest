@@ -1,7 +1,7 @@
 import time
 import numpy as np
 from DecisionTree import *
-from ValidationTools import *
+import ValidationTools
 
 class RandomForest:
     def __init__(self, D, targetAttr, attrsNVals, ntree, attrsSampleFn=None, graph=True):

@@ -74,7 +74,6 @@ class DecisionTree:
         if self.attrsSampleFn is not None:
             # Attributes sampling
             m = ceil(self.attrsSampleFn(len(attrs)))
-            print(m)
             attrsSample = random.sample(attrs, m)
         else:
             attrsSample = attrs

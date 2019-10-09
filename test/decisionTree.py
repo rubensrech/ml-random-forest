@@ -9,12 +9,12 @@ from DecisionTree import *
 
 def main():
     if (len(sys.argv) < 4):
-        print("Usage: python3 %s <dataset-csv> <target-attr> <separator>" % sys.argv[0])
+        print("Usage: python3 %s <dataset-csv> <separator> <target-attr>" % sys.argv[0])
         exit(-1)
 
     datasetFile = sys.argv[1]
-    targetAttr = sys.argv[2]
-    separator = sys.argv[3]
+    separator = sys.argv[2]
+    targetAttr = sys.argv[3]
 
     # Read dataset
     D = pd.read_csv(datasetFile, sep=separator)
