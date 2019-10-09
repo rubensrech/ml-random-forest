@@ -19,7 +19,8 @@ def main():
     D = pd.read_csv(datasetFile)
 
     # Tree induction
-    tree = DecisionTree(D, targetAttr)
+    attrsNVals = D.nunique()
+    tree = DecisionTree(D, targetAttr, attrsNVals)
     tree.render()
 
     # Test classification
