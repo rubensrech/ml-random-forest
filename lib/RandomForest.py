@@ -45,7 +45,8 @@ class RandomForest:
             classesData['FP'].append(fp)
             classesData['FN'].append(fn)
             # print("Class: %s (TP = %d, FP = %d, FN = %d)" % (c, tp, fp, fn))
-
+        
+        res = {}
         classesMetrics = pd.DataFrame(classesData, index=classes)
 
         # Calculate macro metrics (precision and recall)
@@ -53,14 +54,12 @@ class RandomForest:
         Rec = lambda c: c['TP']/(c['TP']+c['FN']) if c['TP']+c['FN'] > 0 else 0
         classesMetrics['Precision'] = classesMetrics.apply(Prec, axis=1)
         classesMetrics['Recall'] = classesMetrics.apply(Rec, axis=1)
-        prec = classesMetrics['Precision'].mean()
-        rec = classesMetrics['Recall'].mean()
-        # Calculate F1-measure
-        F1 = 2 * (prec * rec)/(prec + rec) if (prec + rec) > 0 else 0
 
-        # print(classesMetrics)
-        # print(F1)
-        return (prec, rec, F1)
+        res['precision'] = classesMetrics['Precision'].mean()
+        res['recall'] = classesMetrics['Recall'].mean()
+        res['F1'] = 2 * (res['precision'] * res['recall'])/(res['precision'] + res['recall']) if (res['precision'] + res['recall']) > 0 else 0
+        res['accuracy'] = len(Dt[Dt[targetAttr] == preds])/len(Dt)
+        return res
 
     def render(self):
         for tree in self.trees:

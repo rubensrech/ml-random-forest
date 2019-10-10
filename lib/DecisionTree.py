@@ -83,7 +83,7 @@ class DecisionTree:
         # If selected attribute is numeric
         if (is_numeric_dtype(D[maxGainAttr])):
             # Define attribute division cutoff
-            cutoff = D.groupby([targetAttr])[maxGainAttr].mean().agg('mean') # D[maxGainAttr].mean()
+            cutoff = D[maxGainAttr].mean()
             # Create node of selected numerical attribute
             node = NumAttrNode(maxGainAttr, maxGain, self.graph, cutoff)
             # A <= cutoff
