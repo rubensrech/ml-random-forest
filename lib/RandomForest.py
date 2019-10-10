@@ -59,6 +59,7 @@ class RandomForest:
         res['recall'] = classesMetrics['Recall'].mean()
         res['F1'] = 2 * (res['precision'] * res['recall'])/(res['precision'] + res['recall']) if (res['precision'] + res['recall']) > 0 else 0
         res['accuracy'] = len(Dt[Dt[targetAttr] == preds])/len(Dt)
+        print(res)
         return res
 
     def render(self):

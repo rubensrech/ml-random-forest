@@ -9,22 +9,24 @@ sys.path.append(LIB_PATH)
 import ValidationTools
 
 def main():
-    if (len(sys.argv) < 6):
-        print("Usage: python3 %s <dataset-csv> <separator> <target-attr> <K> <ntree>" % sys.argv[0])
+    if (len(sys.argv) < 8):
+        print("Usage: python3 %s <dataset-csv> <separator> <target-attr> <K> <first-ntree> <last-ntree> <step-ntree>" % sys.argv[0])
         exit(-1)
 
     datasetFile = sys.argv[1]
     separator = sys.argv[2]
     targetAttr = sys.argv[3]
     K = int(sys.argv[4])
-    ntree = int(sys.argv[5])
+    fstNtree = int(sys.argv[5])
+    lstNtree = int(sys.argv[6])
+    stepNtree = int(sys.argv[7])
 
     # Read dataset
     D = pd.read_csv(datasetFile, sep=separator)
-    D.sort_index(inplace=True)
 
     # Run Cross Validation
-    ValidationTools.crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt)
+    ntrees = range(fstNtree, lstNtree+1, stepNtree)
+    ValidationTools.crossValidation(D, targetAttr, K, ntrees, attrsSampleFn=sqrt)
 
 if __name__ == "__main__":
     main()
