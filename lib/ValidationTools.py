@@ -53,11 +53,11 @@ def getKFolds(D, targetAttr, K):
 
 def crossValidation(D, targetAttr, K, ntrees, attrsSampleFn=sqrt):
     print("========================== CROSS VALIDATION ==========================")
-    startTime = time.time()
     # Get the number of possible values for each attribute in dataset
     attrsNVals = D.nunique()
     kfolds = getKFolds(D, targetAttr, K)
     for ntree in ntrees:
+        startTime = time.time()
         print("=========== NTREE = %d ===========" % ntree)
         F1s = []
         precisionAcc = 0
