@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 from graphviz import Digraph
 from pandas.api.types import is_numeric_dtype, is_string_dtype
-from math import ceil
-import random
+
+np.random.seed(1)
 
 from Tree import *
+import ValidationTools
 
 class DecisionTree:
     uid = 0
@@ -67,12 +68,7 @@ class DecisionTree:
         # Find attribute with max info gain
         maxGain = -1
         maxGainAttr = None
-        if self.attrsSampleFn is not None:
-            # Attributes sampling
-            m = ceil(self.attrsSampleFn(len(attrs)))
-            attrsSample = random.sample(attrs, m)
-        else:
-            attrsSample = attrs
+        attrsSample = ValidationTools.attrsSample(attrs, self.attrsSampleFn) if (self.attrsSampleFn is not None) else attrs
         for attr in attrsSample:
             attrGain = self.__infoGain(D, attr)
             if (attrGain > maxGain):

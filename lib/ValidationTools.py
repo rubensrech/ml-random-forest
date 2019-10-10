@@ -9,9 +9,13 @@ random.seed(1)
 
 from RandomForest import *
 
-def sample(D, n):
+def dataSample(D, n):
     indexes = random.sample(list(D.index.values), n)
     return D.loc[indexes]
+
+def attrsSample(attrs, fn):
+    m = ceil(fn(len(attrs)))
+    return random.sample(attrs, m)
 
 def bootstrap(D, frac=1):
     trainIndexes = random.choices(D.index, k=ceil(len(D)*frac))
@@ -35,7 +39,7 @@ def getKFolds(D, targetAttr, K):
         # For each fold
         for i in range(K):
             # Sample instances of class 'c'
-            classSample = sample(classSet, classInstsCount)
+            classSample = dataSample(classSet, classInstsCount)
             # Add sample to fold
             if i not in kfolds:
                 kfolds[i] = classSample

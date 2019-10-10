@@ -1,5 +1,4 @@
 import time
-import numpy as np
 from DecisionTree import *
 import ValidationTools
 class RandomForest:
