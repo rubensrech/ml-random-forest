@@ -21,6 +21,7 @@ def main():
 
     # Read dataset
     D = pd.read_csv(datasetFile, sep=separator)
+    D.sort_index(inplace=True)
 
     # Run Cross Validation
     ValidationTools.crossValidation(D, targetAttr, K, ntree, attrsSampleFn=sqrt)

@@ -17,7 +17,8 @@ def dataSample(D, n):
 def attrsSample(attrs, fn):
     random.seed(1)
     m = ceil(fn(len(attrs)))
-    return random.sample(attrs, m)
+    sample = random.sample(attrs, m)
+    return sample
 
 def bootstrap(D, frac=1):
     random.seed(1)
@@ -37,6 +38,7 @@ def getKFolds(D, targetAttr, K):
     for c in classes:
         # Get instances of class 'c' in 'D'
         classSet = D[D[targetAttr] == c]
+        classSet.sort_index(inplace=True)
         # Get number of instances of class 'c' to be in each fold
         classInstsCount = floor(classesInstsCount.loc[c]['InstsPerFold'])
         # For each fold
