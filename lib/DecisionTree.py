@@ -12,7 +12,7 @@ class DecisionTree:
     uid = 0
 
     def __init__(self, D, targetAttr, attrsNVals, attrsSampleFn=None, graph=True):
-        self.graph = self.__createGraph() if graph else None
+        self.graph = self.createGraph() if graph else None
 
         self.targetAttr = targetAttr
         self.attrsNVals = attrsNVals
@@ -20,9 +20,9 @@ class DecisionTree:
 
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
-        self.tree = self.__induct(D, attrs)
+        self.tree = self.induct(D, attrs)
 
-    def __createGraph(self):
+    def createGraph(self):
         self.filename = "Tree%d" % DecisionTree.uid
         DecisionTree.uid += 1
         return Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
@@ -56,8 +56,7 @@ class DecisionTree:
         attrsInfoGain = currEntropy - attrsEntropy
         return attrsInfoGain
         
-
-    def __induct(self, D, attrs):
+    def induct(self, D, attrs):
         targetAttr = self.targetAttr
         sampleFn = self.attrsSampleFn
 
@@ -96,7 +95,7 @@ class DecisionTree:
                 majorityClass = D[targetAttr].value_counts().idxmax()
                 return ClassNode(majorityClass, len(D), self.graph)
             else:
-                node.setLeftChild(self.__induct(Dv, attrs))
+                node.setLeftChild(self.induct(Dv, attrs))
             # A > cutoff
             Dv = D[D[maxGainAttr] > cutoff]
             # If partition is empty
@@ -105,7 +104,7 @@ class DecisionTree:
                 majorityClass = D[targetAttr].value_counts().idxmax()
                 return ClassNode(majorityClass, len(D), self.graph)
             else:
-                node.setRightChild(self.__induct(Dv, attrs))
+                node.setRightChild(self.induct(Dv, attrs))
         # If selected attribute is categorical
         else:
             attrValues = D[maxGainAttr].unique()
