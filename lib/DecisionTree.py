@@ -36,16 +36,14 @@ class DecisionTree:
         def attrEntropy(attr):
             # Partitionate dataset D using 'attr'
             attrPartitionsCount = D.groupby([attr, targetAttr])[targetAttr].count()
-            # Create (auxiliary) table with resultant partitions Dj
-            attrPartitions = D.groupby([attr]).agg({ targetAttr: 'count' })
-            # Calculate |Dj|/|D| for each partition Dj
-            attrPartitions['Prop'] = attrPartitions[targetAttr].apply(lambda x: x/len(D))
+            # Count instances in each partition
+            partitionsSize = D.groupby(attr)[targetAttr].agg('count')
+            # Calculate proportion |Dj|/|D| for each partition Dj
+            prop = partitionsSize / len(D)
             # Calculate entropy Info(Dj) for each parition Dj 
-            attrPartitions['PartEntropy'] = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
-            # Calculate |Dj|/|D| * Info(Dj) for each parition Dj
-            attrPartitions['Entropy'] = attrPartitions['Prop'] * attrPartitions['PartEntropy']
-            # Calculate entropy InfoA(D) of dataset after partitioning with attribute 'currAttr' 
-            newEntropy = attrPartitions['Entropy'].agg('sum')
+            partEntropy = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
+            # Calculate entropy InfoA(D) of dataset after partitioning with attribute 'currAttr'
+            newEntropy = np.sum(prop * partEntropy)
             return newEntropy
 
         # Calculate entropy for each attr
@@ -78,6 +76,8 @@ class DecisionTree:
         maxGainAttrIndex = np.argmax(attrsInfoGain)
         maxGain = attrsInfoGain[maxGainAttrIndex]
         maxGainAttr = attrsSample[maxGainAttrIndex]
+
+        attrs.remove(maxGainAttr)
 
         # > Node Split <
         node = None
@@ -126,7 +126,7 @@ class DecisionTree:
                     return ClassNode(majorityClass, len(D), self.graph)
                 else:
                     # Connect node to sub-tree
-                    node.setChild(v, self.__induct(Dv, attrs))
+                    node.setChild(v, self.induct(Dv, attrs))
 
         return node
 

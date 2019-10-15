@@ -22,7 +22,7 @@ def main():
     targetAttr = sys.argv[2]
     separator = ','
 
-    random.seed(1)
+    random.seed(0)
     np.random.seed(0)
 
     # Read dataset
@@ -31,6 +31,7 @@ def main():
     t0 = time.time()
 
     tree = DecisionTree(D, targetAttr, D.nunique(), attrsSampleFn=sqrt, graph=True)
+    # tree.render()
 
     print("%f" % (time.time() - t0))
 
