@@ -5,8 +5,6 @@ from math import sqrt, ceil
 import random
 import time
 
-random.seed(1)
-
 from RandomForest import *
 
 def dataSample(D, n):
@@ -15,7 +13,7 @@ def dataSample(D, n):
 
 def attrsSample(attrs, fn):
     m = ceil(fn(len(attrs)))
-    sample = random.sample(attrs, m)
+    sample = np.random.choice(attrs, m, replace=False)
     return sample
 
 def bootstrap(D, frac=1):

@@ -3,7 +3,7 @@ import numpy as np
 from graphviz import Digraph
 from pandas.api.types import is_numeric_dtype, is_string_dtype
 
-np.random.seed(1)
+import numba as nb
 
 from Tree import *
 import ValidationTools
@@ -27,32 +27,40 @@ class DecisionTree:
         DecisionTree.uid += 1
         return Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
         
-    def __infoGain(self, D, attr):
+    def calcAttrsInfoGain(self, D, attrs):
         targetAttr = self.targetAttr
-        def info(x): return x * np.log2(1/x)
 
+        def info(x):
+            return x * np.log2(1/x)
+
+        def attrEntropy(attr):
+            # Partitionate dataset D using 'attr'
+            attrPartitionsCount = D.groupby([attr, targetAttr])[targetAttr].count()
+            # Create (auxiliary) table with resultant partitions Dj
+            attrPartitions = D.groupby([attr]).agg({ targetAttr: 'count' })
+            # Calculate |Dj|/|D| for each partition Dj
+            attrPartitions['Prop'] = attrPartitions[targetAttr].apply(lambda x: x/len(D))
+            # Calculate entropy Info(Dj) for each parition Dj 
+            attrPartitions['PartEntropy'] = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
+            # Calculate |Dj|/|D| * Info(Dj) for each parition Dj
+            attrPartitions['Entropy'] = attrPartitions['Prop'] * attrPartitions['PartEntropy']
+            # Calculate entropy InfoA(D) of dataset after partitioning with attribute 'currAttr' 
+            newEntropy = attrPartitions['Entropy'].agg('sum')
+            return newEntropy
+
+        # Calculate entropy for each attr
+        attrsEntropy = np.array([attrEntropy(attr) for attr in attrs])
         # Calculate dataset (D) current entropy
         currEntropy = D.groupby(targetAttr).size().apply(lambda x: info(x/len(D))).agg('sum')
-
-        # Partitionate dataset D using 'attr'
-        attrPartitionsCount = D.groupby([attr, targetAttr])[targetAttr].count()
-        # Create (auxiliary) table with resultant partitions Dj
-        attrPartitions = D.groupby([attr]).agg({ targetAttr: 'count' })
-        # Calculate |Dj|/|D| for each partition Dj
-        attrPartitions['Prop'] = attrPartitions[targetAttr].apply(lambda x: x/len(D))
-        # Calculate entropy Info(Dj) for each parition Dj 
-        attrPartitions['PartEntropy'] = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
-        # Calculate |Dj|/|D| * Info(Dj) for each parition Dj
-        attrPartitions['Entropy'] = attrPartitions['Prop'] * attrPartitions['PartEntropy']
-        # Calculate entropy InfoA(D) of dataset after partitioning with attribute 'currAttr' 
-        newEntropy = attrPartitions['Entropy'].agg('sum')
-        # Calculate gain Gain(A)
-        attrGain = currEntropy - newEntropy
+        # Calculate info gain
+        attrsInfoGain = currEntropy - attrsEntropy
+        return attrsInfoGain
         
-        return attrGain
 
     def __induct(self, D, attrs):
         targetAttr = self.targetAttr
+        sampleFn = self.attrsSampleFn
+
         # If all instances in D has same class
         Dclasses = D[targetAttr].unique()
         if (len(Dclasses) == 1):
@@ -66,17 +74,11 @@ class DecisionTree:
             return ClassNode(majorityClass, len(D), self.graph)
 
         # Find attribute with max info gain
-        maxGain = -1
-        maxGainAttr = None
-        attrsSample = ValidationTools.attrsSample(attrs, self.attrsSampleFn) if (self.attrsSampleFn is not None) else attrs
-        for attr in attrsSample:
-            attrGain = self.__infoGain(D, attr)
-            if (attrGain > maxGain):
-                maxGain = attrGain
-                maxGainAttr = attr
-
-        # Remove attribute from attributes list
-        attrs.remove(maxGainAttr)
+        attrsSample = ValidationTools.attrsSample(attrs, sampleFn) if (sampleFn is not None) else attrs
+        attrsInfoGain = self.calcAttrsInfoGain(D, attrsSample)
+        maxGainAttrIndex = np.argmax(attrsInfoGain)
+        maxGain = attrsInfoGain[maxGainAttrIndex]
+        maxGainAttr = attrsSample[maxGainAttrIndex]
 
         # > Node Split <
         node = None
