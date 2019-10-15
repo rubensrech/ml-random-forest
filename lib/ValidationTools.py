@@ -17,10 +17,7 @@ def attrsSample(attrs, fn):
     return sample
 
 def bootstrap(D, frac=1):
-    trainIndexes = random.choices(D.index, k=ceil(len(D)*frac))
-    trainSet = D.loc[trainIndexes]
-    testSet = D.drop(trainIndexes)
-    return (trainSet, testSet)
+    return D.sample(frac=frac, replace=True)
 
 def getKFolds(D, targetAttr, K):
     kfolds = {}

@@ -11,7 +11,7 @@ LIB_PATH = os.path.join(os.path.dirname(__file__), '../lib')
 sys.path.append(LIB_PATH)
 
 import ValidationTools
-from DecisionTree import DecisionTree
+from RandomForest import RandomForest
 
 def main():
     if (len(sys.argv) < 3):
@@ -30,8 +30,7 @@ def main():
 
     t0 = time.time()
 
-    tree = DecisionTree(D, targetAttr, D.nunique(), attrsSampleFn=sqrt, graph=True)
-    # tree.render()
+    forest = RandomForest(D, targetAttr, D.nunique(), 10, sqrt, False)
 
     print("%f" % (time.time() - t0))
 

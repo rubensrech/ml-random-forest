@@ -10,9 +10,9 @@ class RandomForest:
         for i in range(ntree):
             print(">> Training trees... (%d/%d)" % (i+1, ntree), end='\r')
             # Get bootstraps
-            (trainSet, testSet) = ValidationTools.bootstrap(D)
+            bootstrap = ValidationTools.bootstrap(D)
             # Create Decision Tree from training set
-            tree = DecisionTree(trainSet, targetAttr, attrsNVals, attrsSampleFn=attrsSampleFn, graph=graph)
+            tree = DecisionTree(bootstrap, targetAttr, attrsNVals, attrsSampleFn=attrsSampleFn, graph=graph)
             # Add tree to the ensemble
             self.trees.append(tree)
         trainingTime = time.time() - startTime
