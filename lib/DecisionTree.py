@@ -3,16 +3,14 @@ import numpy as np
 from graphviz import Digraph
 from pandas.api.types import is_numeric_dtype, is_string_dtype
 
-import numba as nb
-
 from Tree import *
-import ValidationTools
+import ValidationTools as vt
 
 class DecisionTree:
     uid = 0
 
     def __init__(self, D, targetAttr, attrsNVals, attrsSampleFn=None, graph=True):
-        self.graph = self.createGraph() if graph else None
+        self.graph = self.__createPlot() if graph else None
 
         self.targetAttr = targetAttr
         self.attrsNVals = attrsNVals
@@ -20,28 +18,34 @@ class DecisionTree:
 
         attrs = D.keys().tolist()
         attrs.remove(targetAttr)
-        self.tree = self.induct(D, attrs)
+        self.tree = self.__build(D, np.array(attrs))
 
-    def createGraph(self):
+    def __createPlot(self):
         self.filename = "Tree%d" % DecisionTree.uid
         DecisionTree.uid += 1
         return Digraph(filename=self.filename, edge_attr={'fontsize':'10.0'}, format="pdf")
         
-    def calcAttrsInfoGain(self, D, attrs):
+    def __calculateInfoGains(self, D, attrs):
         targetAttr = self.targetAttr
+        classValues = D[targetAttr].nunique()
 
         def info(x):
-            return x * np.log2(1/x)
+            return np.nan_to_num(-x * np.log2(x, where=(x>0)))
 
+        def vectorizeAttrPart(attr):
+            partData = D.groupby([attr, targetAttr])[targetAttr].count().unstack().fillna(0).stack()
+            attrValues = D[attr].nunique()
+            return partData.to_numpy().reshape((attrValues, classValues))
+        
         def attrEntropy(attr):
-            # Partitionate dataset D using 'attr'
-            attrPartitionsCount = D.groupby([attr, targetAttr])[targetAttr].count()
+            # Vectorization
+            partVectorizedData = vectorizeAttrPart(attr)
             # Count instances in each partition
-            partitionsSize = D.groupby(attr)[targetAttr].agg('count')
+            partitionsSize = np.sum(partVectorizedData, axis=1)
             # Calculate proportion |Dj|/|D| for each partition Dj
             prop = partitionsSize / len(D)
-            # Calculate entropy Info(Dj) for each parition Dj 
-            partEntropy = attrPartitionsCount.groupby(level=0).agg(lambda x: np.sum(info(x/x.sum())))
+            # Calculate entropy Info(Dj) for each parition Dj
+            partEntropy = np.sum(info(partVectorizedData / partitionsSize[:, None]), axis=1)
             # Calculate entropy InfoA(D) of dataset after partitioning with attribute 'currAttr'
             newEntropy = np.sum(prop * partEntropy)
             return newEntropy
@@ -49,12 +53,12 @@ class DecisionTree:
         # Calculate entropy for each attr
         attrsEntropy = np.array([attrEntropy(attr) for attr in attrs])
         # Calculate dataset (D) current entropy
-        currEntropy = D.groupby(targetAttr).size().apply(lambda x: info(x/len(D))).agg('sum')
+        currEntropy = np.sum(info(D.groupby(targetAttr).size().to_numpy() / len(D)))
         # Calculate info gain
         attrsInfoGain = currEntropy - attrsEntropy
         return attrsInfoGain
         
-    def induct(self, D, attrs):
+    def __build(self, D, attrs):
         targetAttr = self.targetAttr
         sampleFn = self.attrsSampleFn
 
@@ -71,14 +75,14 @@ class DecisionTree:
             return ClassNode(majorityClass, len(D), self.graph)
 
         # Find attribute with max info gain
-        attrsSample = ValidationTools.attrsSample(attrs, sampleFn) if (sampleFn is not None) else attrs
-        attrsInfoGain = self.calcAttrsInfoGain(D, attrsSample)
+        attrsSample = vt.attrsSample(attrs, sampleFn) if (sampleFn is not None) else attrs
+        attrsInfoGain = self.__calculateInfoGains(D, attrsSample)
         maxGainAttrIndex = np.argmax(attrsInfoGain)
         maxGain = attrsInfoGain[maxGainAttrIndex]
         maxGainAttr = attrsSample[maxGainAttrIndex]
 
-        attrs.remove(maxGainAttr)
-
+        attrs = attrs[attrs != maxGainAttr]
+        
         # > Node Split <
         node = None
         # If selected attribute is numeric
@@ -95,7 +99,7 @@ class DecisionTree:
                 majorityClass = D[targetAttr].value_counts().idxmax()
                 return ClassNode(majorityClass, len(D), self.graph)
             else:
-                node.setLeftChild(self.induct(Dv, attrs))
+                node.setLeftChild(self.__build(Dv, attrs))
             # A > cutoff
             Dv = D[D[maxGainAttr] > cutoff]
             # If partition is empty
@@ -104,7 +108,7 @@ class DecisionTree:
                 majorityClass = D[targetAttr].value_counts().idxmax()
                 return ClassNode(majorityClass, len(D), self.graph)
             else:
-                node.setRightChild(self.induct(Dv, attrs))
+                node.setRightChild(self.__build(Dv, attrs))
         # If selected attribute is categorical
         else:
             attrValues = D[maxGainAttr].unique()
@@ -126,7 +130,7 @@ class DecisionTree:
                     return ClassNode(majorityClass, len(D), self.graph)
                 else:
                     # Connect node to sub-tree
-                    node.setChild(v, self.induct(Dv, attrs))
+                    node.setChild(v, self.__build(Dv, attrs))
 
         return node
 

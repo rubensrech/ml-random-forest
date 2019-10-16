@@ -2,8 +2,8 @@ import pandas as pd
 from math import floor
 from statistics import mean, stdev
 from math import sqrt, ceil
-import random
 import time
+import numpy as np
 
 from RandomForest import *
 
